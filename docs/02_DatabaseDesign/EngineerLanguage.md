@@ -166,3 +166,68 @@ Engineer・LanguageMasterとの外部キー制約を設定する。
 - TOEIC・IELTS・TOEFL連携
 - AIによる語学力推定
 - 面接評価連携
+---
+
+# 9. API
+
+| Method | Endpoint |
+|---------|----------|
+| GET | /engineer-languages |
+| GET | /engineer-languages/{id} |
+| POST | /engineer-languages |
+| PUT | /engineer-languages/{id} |
+| DELETE | /engineer-languages/{id} |
+
+---
+
+# 10. Index
+
+- engineer_id
+- language_id
+- speaking_level
+- writing_level
+- business_available
+
+---
+
+# 11. KPI
+
+EngineerLanguageから以下を集計する。
+
+- 多言語対応エンジニア数
+- ビジネスレベル以上の保有人数
+- 言語別エンジニア数
+- 語学資格保有率
+- 平均語学レベル
+
+---
+
+# 12. Prisma実装方針
+
+Model名
+
+EngineerLanguage
+
+Table名
+
+engineer_languages
+
+UUIDを採用する。
+
+Engineer・LanguageMasterとの外部キー制約を設定する。
+
+同一Engineerに対して、同一Languageは一意制約を設定する。
+
+---
+
+# 13. 将来拡張
+
+将来的に以下を追加する。
+
+- CEFRとの自動変換
+- JLPT連携
+- TOEIC・IELTS・TOEFL連携
+- AIによる語学力推定
+- 面接評価連携
+- 音声会話テスト連携
+- AIによる発音評価
