@@ -112,3 +112,68 @@ AIは以下を支援する。
 - 更新期限通知
 - 案件との資格マッチング
 - 資格ランキング分析
+---
+
+# 9. API
+
+| Method | Endpoint |
+|---------|----------|
+| GET | /engineer-certifications |
+| GET | /engineer-certifications/{id} |
+| POST | /engineer-certifications |
+| PUT | /engineer-certifications/{id} |
+| DELETE | /engineer-certifications/{id} |
+
+---
+
+# 10. Index
+
+- engineer_id
+- certification_id
+- status
+- expiration_date
+- issued_date
+
+---
+
+# 11. KPI
+
+EngineerCertificationから以下を集計する。
+
+- 資格保有数
+- 有効資格数
+- 期限切れ資格数
+- エンジニア1人あたりの平均資格数
+- 人気資格ランキング
+
+---
+
+# 12. Prisma実装方針
+
+Model名
+
+EngineerCertification
+
+Table名
+
+engineer_certifications
+
+UUIDを採用する。
+
+Engineer・CertificationMasterとの外部キー制約を設定する。
+
+同一Engineerに対して、同一Certificationは一意制約を設定する。
+
+---
+
+# 13. 将来拡張
+
+将来的に以下を追加する。
+
+- Credly連携
+- AWS Certification API連携
+- Microsoft Learn連携
+- Google Cloud Certification連携
+- 資格更新リマインダー
+- AIによる資格取得ロードマップ作成
+- 電子証明書の自動検証
