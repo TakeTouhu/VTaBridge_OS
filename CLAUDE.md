@@ -1,520 +1,510 @@
 # CLAUDE.md
 
-# VTaBridge OS Development Guide
+# VTaBridge OS — Claude Code Operating Instructions
 
-Version: 1.0
+Version: 2.0
+Status: Active
 
----
-
-# あなたの役割
-
-あなたは VTaBridge OS のシニアソフトウェアエンジニアです。
-
-単にコードを書くのではなく、
-
-- 保守性
-- 拡張性
-- 可読性
-- セキュリティ
-- パフォーマンス
-
-を重視してください。
-
-開発者ではなく、
-CTOの視点で設計・実装してください。
+This file is the primary execution guide for Claude Code in this repository.
+Read it completely before changing code.
 
 ---
 
-# プロジェクト概要
+## 1. Mission
 
-VTaBridge OS は
+Build VTaBridge OS as a secure, maintainable, AI-native enterprise business platform.
 
-営業
+The repository currently contains the product vision, architecture, governance, platform, business, data, IoT, manufacturing, robotics, and smart-factory design documents under `docs/01_*` through `docs/30_*`.
 
-↓
+These documents describe the target enterprise architecture. They are not an instruction to implement every documented capability at once.
 
-案件
-
-↓
-
-見積
-
-↓
-
-契約
-
-↓
-
-開発
-
-↓
-
-納品
-
-↓
-
-請求
-
-↓
-
-入金
-
-までを一元管理する
-
-AI Native Business Operating System
-
-です。
+The implementation must proceed incrementally through small, testable vertical slices.
 
 ---
 
-# 開発思想
+## 2. Source of Truth
 
-このシステムは
+Use the following precedence when requirements conflict:
 
-AIを利用するシステム
+1. The current user request
+2. This `CLAUDE.md`
+3. Approved ADRs in `docs/adr/`
+4. Relevant files under `docs/`
+5. Existing tests and public interfaces
+6. Existing implementation
 
-ではありません。
+Do not silently invent business requirements.
 
-AIを前提に設計された
+When a required decision is not defined:
 
-AI Native System
-
-です。
-
-そのため
-
-AIによる判断
-
-↓
-
-人間が承認
-
-↓
-
-システムが実行
-
-を基本としてください。
+- choose the smallest reversible option;
+- record the assumption in the implementation summary;
+- create an ADR when the decision affects architecture, security, data, APIs, or operations;
+- leave a clear TODO only when implementation cannot safely continue.
 
 ---
 
-# 開発原則
+## 3. Working Method
 
-以下を必ず守ってください。
+Before editing:
 
-## Rule-01
+1. Inspect the repository structure.
+2. Read the relevant design documents.
+3. Identify existing conventions and dependencies.
+4. State the intended change as a short implementation plan.
+5. Implement only the requested scope.
 
-シンプルな実装を優先してください。
+After editing:
 
----
+1. Run formatting.
+2. Run static analysis and type checking.
+3. Run relevant unit and integration tests.
+4. Run the build when practical.
+5. Review the diff for accidental or unrelated changes.
+6. Summarize changed files, decisions, tests, and remaining risks.
 
-## Rule-02
-
-不要なライブラリは追加しないでください。
-
----
-
-## Rule-03
-
-可読性を最優先してください。
-
----
-
-## Rule-04
-
-コメントより
-
-読みやすいコードを書いてください。
+Never claim a command passed unless it was actually executed successfully.
 
 ---
 
-## Rule-05
+## 4. Delivery Strategy
 
-SOLID原則を守ってください。
+Do not attempt to implement all 30 chapters as one program increment.
+
+Use this order:
+
+### Phase 0 — Repository Foundation
+
+- workspace and package structure;
+- local development environment;
+- configuration validation;
+- logging and error handling;
+- linting, formatting, type checking, tests, and CI;
+- architecture decision records;
+- secure secret handling.
+
+### Phase 1 — First Vertical Slice
+
+Implement one complete business flow from UI to persistence:
+
+`Customer -> Opportunity -> Estimate -> Approval -> Audit Log`
+
+The slice must include:
+
+- domain model;
+- application use cases;
+- persistence adapter;
+- API contract;
+- authorization checks;
+- user interface;
+- validation and error handling;
+- audit trail;
+- automated tests;
+- minimal operational documentation.
+
+### Phase 2 — Core Business Platform
+
+Expand one bounded context at a time:
+
+- Sales and CRM;
+- estimates and contracts;
+- delivery and project tracking;
+- invoicing and payments;
+- document and workflow management.
+
+### Phase 3 — AI Assistance
+
+Add AI only after the underlying deterministic workflow is reliable.
+
+AI may propose, summarize, classify, search, or recommend. High-impact actions require explicit human approval.
+
+### Phase 4 — Enterprise Integrations
+
+Add Microsoft 365, Azure, Fabric, Power Platform, Dynamics 365, IoT, manufacturing, robotics, and smart-factory integrations only through explicit milestones.
 
 ---
 
-## Rule-06
+## 5. Architecture Rules
 
-DRY原則を守ってください。
+Use a modular monolith first. Do not introduce microservices unless measured scaling, isolation, deployment, security, or ownership requirements justify them.
 
----
+Organize the system by bounded context and keep dependencies directed inward:
 
-## Rule-07
-
-YAGNIを守ってください。
-
----
-
-## Rule-08
-
-すべてTypeScriptで実装してください。
-
----
-
-## Rule-09
-
-strict modeを有効にしてください。
-
----
-
-## Rule-10
-
-any型は禁止します。
-
----
-
-# アーキテクチャ
-
-以下を採用します。
-
-- Clean Architecture
-- Domain Driven Design
-- Repository Pattern
-- Dependency Injection
-- Event Driven Architecture
-
----
-
-# ディレクトリ構成
-
-```
-src/
-
-app/
-
-components/
-
-features/
-
-hooks/
-
-services/
-
-repositories/
-
-domain/
-
-entities/
-
-usecases/
-
-lib/
-
-types/
-
-utils/
-
-config/
+```text
+interface / delivery
+        ↓
+application
+        ↓
+domain
+        ↑
+infrastructure adapters
 ```
 
----
+Rules:
 
-# UI
-
-UIは
-
-shadcn/ui
-
-を利用してください。
-
-スタイルは
-
-Tailwind CSS
-
-を利用してください。
-
-コンポーネントは
-
-再利用可能な設計にしてください。
+- Domain code must not depend on frameworks, databases, HTTP, UI, or external SDKs.
+- Application services orchestrate use cases and transactions.
+- Infrastructure implements ports defined by inner layers.
+- UI and API layers must not contain business rules.
+- Cross-context access must use explicit contracts.
+- Prefer synchronous calls initially; add messaging only for genuine asynchronous behavior.
+- Do not introduce CQRS or event sourcing by default.
+- Use domain events only when another part of the system has a real reaction to a completed domain action.
 
 ---
 
-# 状態管理
+## 6. Baseline Technology
 
-原則
+Use the existing repository configuration when present. For new foundation work, use this baseline unless an ADR approves a change:
 
-React Server Components
+- Language: TypeScript with strict mode
+- Runtime: current active Node.js LTS
+- Package manager: pnpm
+- Workspace: pnpm workspaces
+- Web: Next.js with React Server Components where appropriate
+- UI: Tailwind CSS and accessible reusable components
+- API: REST with OpenAPI
+- Database: PostgreSQL
+- ORM: Prisma
+- Validation: schema-based runtime validation
+- Unit and integration tests: Vitest
+- End-to-end tests: Playwright
+- Containers: Docker for reproducible local dependencies
+- CI: GitHub Actions
 
-を利用してください。
+Do not add a dependency when the platform or an existing dependency already solves the problem adequately.
 
-Client Componentは
-
-必要最小限にしてください。
-
----
-
-# API
-
-REST API
-
-を採用してください。
-
-命名規則
-
-GET
-
-POST
-
-PUT
-
-DELETE
-
-PATCH
-
-を守ってください。
+Do not ban raw SQL categorically. Use it only when Prisma cannot express a correct or performant query, isolate it in infrastructure, parameterize it, test it, and document the reason.
 
 ---
 
-# Database
+## 7. Repository Target Structure
 
-PostgreSQL
+Prefer the following structure for implementation:
 
-Prisma ORM
+```text
+apps/
+  web/
+  api/
 
-を採用してください。
+packages/
+  domain/
+  application/
+  database/
+  contracts/
+  ui/
+  config/
+  observability/
+  testing/
 
-Raw SQLは禁止です。
+infra/
+  docker/
+  terraform/
 
----
+scripts/
 
-# ログ
+tests/
+  integration/
+  e2e/
 
-以下を必ず残してください。
+docs/
+  adr/
+```
 
-- Error
-
-- Warning
-
-- Info
-
-- Audit Log
-
----
-
-# AI
-
-AIは
-
-Manager
-
-↓
-
-Agent
-
-↓
-
-Tool
-
-という階層構造で設計してください。
-
-AI同士が直接通信しないでください。
-
-必ずAI Manager経由で通信してください。
+Do not create empty placeholder packages. Add a package only when the current milestone uses it.
 
 ---
 
-# メール
+## 8. Coding Standards
 
-メール解析
+- Enable strict TypeScript settings.
+- Do not use `any`; use `unknown` with narrowing when the input is untrusted.
+- Prefer explicit domain types over primitive strings and numbers for important concepts.
+- Keep functions focused and readable.
+- Prefer composition over inheritance.
+- Avoid premature abstraction.
+- Avoid duplicated business rules.
+- Use dependency injection at architectural boundaries, not throughout every object.
+- Comments should explain decisions and constraints, not restate code.
+- Public APIs, exported types, and non-obvious domain rules require documentation.
 
-↓
+Naming:
 
-AI判断
-
-↓
-
-返信案生成
-
-↓
-
-人間承認
-
-↓
-
-送信
-
-を基本フローとしてください。
-
-AIによる自動送信は禁止します。
+- variables and functions: `camelCase`
+- types, classes, React components: `PascalCase`
+- constants: `UPPER_SNAKE_CASE` only for true constants
+- files: follow the framework convention consistently
+- database tables and columns: `snake_case`
+- REST paths: plural nouns in `kebab-case`
 
 ---
 
-# 見積
+## 9. API Rules
 
-AIは
+- Define contracts before implementation.
+- Use resource-oriented REST endpoints.
+- Use correct HTTP methods and status codes.
+- Validate all external input at the boundary.
+- Return a consistent error envelope.
+- Use idempotency keys for retryable state-changing operations where duplication is harmful.
+- Paginate collection endpoints.
+- Do not expose database entities directly.
+- Generate and maintain OpenAPI documentation.
+- Version public APIs only when a breaking change is necessary.
 
-見積作成まで担当します。
+Example error shape:
 
-最終承認は
-
-人間が行います。
-
----
-
-# セキュリティ
-
-以下を必須としてください。
-
-CSRF
-
-XSS
-
-SQL Injection
-
-Rate Limit
-
-認証
-
-認可
-
-監査ログ
+```json
+{
+  "error": {
+    "code": "ESTIMATE_NOT_FOUND",
+    "message": "The estimate was not found.",
+    "requestId": "...",
+    "details": []
+  }
+}
+```
 
 ---
 
-# コーディングルール
+## 10. Data and Transaction Rules
 
-関数は
-
-1つの責務のみ持つこと。
-
-長い関数は禁止します。
-
-100行を超える場合は
-
-分割してください。
-
----
-
-# 命名規則
-
-変数
-
-camelCase
-
-コンポーネント
-
-PascalCase
-
-DB
-
-snake_case
-
-API
-
-kebab-case
+- Migrations are mandatory for schema changes.
+- Never edit an applied migration.
+- Use database constraints for invariants that must always hold.
+- Define transaction boundaries in the application layer.
+- Store timestamps in UTC.
+- Use stable generated identifiers.
+- Add optimistic concurrency control where concurrent edits can cause data loss.
+- Do not perform destructive schema or data changes without an explicit migration and rollback plan.
+- Seed data must be deterministic and safe for non-production use.
 
 ---
 
-# エラー処理
+## 11. Security Rules
 
-try-catch
+Security is part of the feature definition, not a later task.
 
-だけに依存しないでください。
+Every implementation must consider:
 
-Result型
+- authentication;
+- authorization and least privilege;
+- tenant or organizational data isolation when applicable;
+- input validation;
+- output encoding;
+- CSRF protection where relevant;
+- XSS prevention;
+- SQL injection prevention;
+- rate limiting and abuse protection;
+- secret management;
+- secure headers and cookies;
+- audit logging;
+- dependency and supply-chain risk;
+- personal and confidential data handling.
 
-または
+Never commit secrets, tokens, credentials, private keys, production data, or sensitive logs.
 
-Error Object
-
-を利用してください。
-
----
-
-# テスト
-
-Vitest
-
-Playwright
-
-を採用してください。
-
-重要なロジックには
-
-Unit Test
-
-を作成してください。
+High-impact operations must require explicit authorization and produce an immutable audit record.
 
 ---
 
-# Git
+## 12. AI Rules
 
-1コミット
+AI capabilities must be implemented as replaceable adapters behind stable application interfaces.
 
-1機能
+Required pattern:
 
-を守ってください。
+```text
+User or System Request
+        ↓
+Deterministic validation and authorization
+        ↓
+AI orchestration
+        ↓
+Structured result with evidence and confidence
+        ↓
+Human approval when the action is high impact
+        ↓
+Deterministic execution
+        ↓
+Audit log
+```
 
----
+Rules:
 
-# ADR
-
-重要な設計変更は
-
-必ず
-
-ADR
-
-へ記録してください。
-
----
-
-# 実装方針
-
-Claude Code は
-
-一度に大きな実装をしないでください。
-
-以下の単位で実装してください。
-
-画面
-
-↓
-
-コンポーネント
-
-↓
-
-API
-
-↓
-
-Repository
-
-↓
-
-UseCase
-
-↓
-
-Test
-
-この順番で実装してください。
+- Never allow model output to bypass authorization or validation.
+- Treat model output as untrusted input.
+- Require structured outputs for machine-consumed responses.
+- Record model, prompt version, tool calls, latency, and outcome without logging sensitive content unnecessarily.
+- Ground business answers in authorized enterprise data.
+- Enforce permission trimming before retrieval and before presenting results.
+- Provide citations or source references for RAG responses.
+- Add evaluation datasets and regression tests before promoting AI behavior.
+- Do not automatically send email, approve estimates, sign contracts, issue invoices, make payments, or control industrial equipment without an explicitly approved policy.
+- Make providers replaceable; do not spread vendor-specific SDK calls through domain or application code.
 
 ---
 
-# 出力ルール
+## 13. Observability and Audit
 
-コードだけでなく、
+Use structured logs with a request or correlation ID.
 
-以下も同時に作成してください。
+Capture:
 
-- テストコード
-- コメント
-- 型定義
-- API仕様
-- 必要なMigration
+- errors and warnings;
+- security-relevant events;
+- business events;
+- external dependency failures;
+- latency and throughput;
+- AI invocation metadata;
+- audit events for sensitive changes.
+
+Do not log secrets, access tokens, full prompts containing confidential data, or unnecessary personal data.
+
+Audit records must state who performed the action, what changed, when it occurred, and the originating request.
 
 ---
 
-# 最重要
+## 14. Testing Requirements
 
-分からないことを推測して実装しないでください。
+Use the test pyramid:
 
-必ず設計書を確認してください。
+- unit tests for domain rules and pure logic;
+- integration tests for database, repositories, APIs, and external adapters;
+- end-to-end tests for critical user journeys;
+- contract tests for external integrations;
+- security tests for authorization boundaries;
+- AI evaluation tests for prompt and retrieval behavior.
 
-設計書に記載が無い場合は
+Every bug fix must include a regression test when practical.
 
-TODOコメントを残してください。
+Tests must be deterministic. Do not depend on real production services in normal CI.
 
-独自判断で仕様を決めないでください。
+A feature is not complete when tests, migrations, API documentation, security checks, or operational behavior are missing.
+
+---
+
+## 15. Definition of Done
+
+A change is complete only when:
+
+- the requested behavior works;
+- acceptance criteria are satisfied;
+- relevant design documents were followed;
+- types and validation are complete;
+- authorization is enforced;
+- errors are handled consistently;
+- audit and observability requirements are addressed;
+- migrations are included when required;
+- tests pass;
+- formatting, linting, type checking, and build pass;
+- documentation and OpenAPI are updated;
+- no unrelated changes are included;
+- remaining risks and assumptions are reported.
+
+---
+
+## 16. Git and Change Discipline
+
+- Keep changes small and reviewable.
+- One commit should represent one coherent change.
+- Use clear imperative commit messages.
+- Do not rewrite unrelated files.
+- Do not reformat the entire repository during a feature change.
+- Never force-push or delete branches without explicit instruction.
+- Never disable tests, lint rules, type checks, security checks, or CI merely to make a build pass.
+
+For substantial work, use a feature branch and pull request.
+
+---
+
+## 17. Architecture Decision Records
+
+Create an ADR under `docs/adr/` for decisions involving:
+
+- framework or language changes;
+- service boundaries;
+- data ownership;
+- authentication or authorization architecture;
+- messaging and event design;
+- public API compatibility;
+- AI provider or orchestration architecture;
+- infrastructure topology;
+- major security or compliance trade-offs.
+
+Use the format:
+
+```text
+Title
+Status
+Context
+Decision
+Consequences
+Alternatives considered
+```
+
+---
+
+## 18. Prohibited Behavior
+
+Do not:
+
+- implement all design documents at once;
+- create speculative microservices;
+- create empty scaffolding for future chapters;
+- duplicate business logic across UI, API, and database layers;
+- hide failures with broad exception handling;
+- use `any` to silence type errors;
+- weaken validation or authorization for convenience;
+- expose secrets or confidential data;
+- silently change documented behavior;
+- claim tests passed without running them;
+- replace working code without a clear benefit;
+- make irreversible production changes without explicit approval.
+
+---
+
+## 19. First Implementation Assignment
+
+When asked to begin implementation and no narrower task is provided:
+
+1. Inspect the complete repository.
+2. Identify existing executable code and configuration.
+3. Create a short gap analysis between the current repository and Phase 0.
+4. Propose the smallest foundation milestone.
+5. Implement that milestone only after the scope is clear.
+6. Do not begin with all business modules.
+
+The preferred first milestone is:
+
+- pnpm workspace;
+- `apps/web` and `apps/api` only when they are immediately used;
+- shared TypeScript configuration;
+- environment validation;
+- PostgreSQL local development setup;
+- Prisma initialization;
+- health endpoint;
+- structured logging;
+- Vitest setup;
+- lint, format, type-check, test, and build scripts;
+- GitHub Actions CI;
+- one ADR describing the modular-monolith baseline.
+
+The preferred first product slice after the foundation is:
+
+`Customer -> Opportunity -> Estimate -> Approval -> Audit Log`
+
+---
+
+## 20. Final Response Format
+
+At the end of each Claude Code task, report:
+
+1. What changed
+2. Files changed
+3. Commands and tests executed
+4. Architectural or security decisions
+5. Assumptions
+6. Remaining risks or follow-up work
+
+Be concise, factual, and explicit about anything not completed.
