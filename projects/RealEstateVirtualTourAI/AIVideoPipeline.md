@@ -1,6 +1,6 @@
 # AI Video Pipeline
 
-Version: 1.0
+Version: 1.1
 
 Status: Draft
 
@@ -33,7 +33,7 @@ Storyboard Generation
 ↓
 Prompt Compilation
 ↓
-Scene Video Generation
+WaveSpeedAI Scene Video Generation
 ↓
 Transition Composition
 ↓
@@ -127,17 +127,21 @@ Human Review
 
 ## 7. 動画生成方式
 
-MVPではシーン単位で短い動画を生成し、後段で結合する。
+MVPではWaveSpeedAIのImage-to-Video APIを使用し、シーン単位で短い動画を生成して後段で結合する。
 
 ```text
-Image 1 → Scene 1 clip
-Image 2 → Scene 2 clip
-Image 3 → Scene 3 clip
-           ↓
-      FFmpeg composition
+Image 1 → WaveSpeedAI Scene 1 clip
+Image 2 → WaveSpeedAI Scene 2 clip
+Image 3 → WaveSpeedAI Scene 3 clip
+                    ↓
+             FFmpeg composition
 ```
 
 一度に長尺を生成するより、失敗時の再生成範囲とコストを抑えられる。
+
+WaveSpeedAIへのアクセスは`WaveSpeedVideoProvider` Adapterを経由し、UI、API Route、Domainから直接APIを呼び出さない。
+
+詳細は`WaveSpeedAIIntegration.md`を正本とする。
 
 ---
 
@@ -151,6 +155,8 @@ Image 3 → Scene 3 clip
 - 90秒: 12〜20シーン
 
 写真枚数が不足する場合は、同じ写真に異なる安全なカメラ移動を適用するが、架空の視点拡張は抑制する。
+
+WaveSpeedAIの各モデルで許可されるシーン尺をCapabilityとして取得し、選択可能な値だけをUIへ表示する。
 
 ---
 
@@ -191,5 +197,40 @@ Image 3 → Scene 3 clip
 - ジョブ開始時にクレジット予約
 - 失敗時は利用規約に基づき返還
 - シーン単位の再生成
-- プロバイダー別原価記録
+- WaveSpeedAIのモデル別原価記録
+- 推定原価と実原価を分離
 - 同一入力・設定の重複生成防止
+
+---
+
+## 12. WaveSpeedAI実行フロー
+
+```text
+Scene input validation
+↓
+Create short-lived signed image URL
+↓
+Compile preservation-first prompt
+↓
+POST https://api.wavespeed.ai/api/v3/{model-id}
+↓
+Store prediction ID
+↓
+Webhook or status polling
+↓
+GET /api/v3/predictions/{predictionId}/result
+↓
+Copy temporary output to managed object storage
+↓
+Validate clip
+↓
+Compose final video
+```
+
+初期候補モデルは以下とする。
+
+```text
+wavespeed-ai/open-video/image-to-video
+```
+
+モデルID、対応解像度、対応尺、価格、同時実行制限はコードへ固定せず設定管理する。実装時点で公式ドキュメントと商用利用条件を再確認する。
